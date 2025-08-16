@@ -1,6 +1,9 @@
 # GENASTRAL
 Herramienta astrológica que traduce coordenadas celestes en arquetipos simbólicos. 
-´´
+---
+## Estructura del Proyecto
+
+```
 astro_chart_generator/
 │
 ├── data/
@@ -22,4 +25,4 @@ astro_chart_generator/
 │
 └── utils/
     └── config.py               # Parámetros como sistema de casas, tipo de zodíaco
-´´
+```
