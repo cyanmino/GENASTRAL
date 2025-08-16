@@ -4,7 +4,7 @@ Herramienta astrológica que traduce coordenadas celestes en arquetipos simbóli
 ## Estructura del Proyecto
 
 ```
-astro_chart_generator/
+GENASTRAL/
 │
 ├── data/
 │   └── ephemeris/              # Tablas astronómicas si no usas librerías externas
