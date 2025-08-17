@@ -35,14 +35,15 @@ def get_planet_positions(utc_datetime, latitude=0.0, longitude=0.0):
     planets = load('de421.bsp')  # Se descarga automáticamente si no existe
 
     # Crear observador geográfico
-    observer = planets['earth'] + Topos(latitude_degrees=latitude, longitude_degrees=longitude)
+    observer = planets['earth']
 
     positions = {}
     for name, key in PLANET_KEYS.items():
         body = planets[key]
         astrometric = observer.at(t).observe(body).apparent()
         ecliptic = astrometric.ecliptic_latlon()
-        lon = ecliptic[1].degrees  # Longitud eclíptica
+        lon = ecliptic[1].degrees
+
 
         positions[name] = {
             "longitude": lon,                     # 0–360°
