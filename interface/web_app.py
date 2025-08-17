@@ -10,42 +10,25 @@ from chart_drawer import draw_chart
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        date = request.form["date"]
-        time = request.form["time"]
-        city = request.form["city"]
-        system = request.form.get("system", "P")
+@app.route("/generate_chart", methods=["POST"])
+def generate_chart():
+    data = request.json
+    birth_date = data["date"]
+    birth_time = data["time"]
+    location = data["location"]
 
-        try:
-            local_dt = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
-            conversion = local_to_utc(local_dt, city)
-            utc_dt = conversion["utc_datetime"]
-            lat = conversion["latitude"]
-            lon = conversion["longitude"]
+    local_dt = datetime.strptime(f"{birth_date} {birth_time}", "%Y-%m-%d %H:%M")
+    latitude, longitude = get_location_coordinates(location)
+    utc_dt = convert_to_utc(local_dt, latitude, longitude)
 
-            planets = get_planet_positions(utc_dt)
-            houses = calculate_houses(utc_dt, lat, lon, house_system=system)
-            planet_houses = assign_planets_to_houses(planets, houses["cusps"])
-            aspects = calculate_aspects(planets)
+    planets = get_planet_positions(utc_dt, latitude, longitude)
+    houses = calculate_houses(utc_dt, latitude, longitude)
 
-            chart_file = "static/natal_chart.svg"
-            draw_chart(planets, houses, filename=chart_file)
+    chart_svg = draw_chart(planets, houses)  # si tenés un módulo de dibujo
 
-            return render_template("result.html",
-                                   planets=planets,
-                                   houses=houses,
-                                   planet_houses=planet_houses,
-                                   aspects=aspects,
-                                   chart_file=chart_file,
-                                   city=city,
-                                   date=date,
-                                   time=time)
-        except Exception as e:
-            return render_template("index.html", error=str(e))
+    return jsonify({
+        "planets": planets,
+        "houses": houses,
+        "svg": chart_svg
+    })
 
-    return render_template("index.html")
-
-if __name__ == "__main__":
-    app.run(debug=True)
