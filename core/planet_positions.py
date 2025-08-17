@@ -40,8 +40,8 @@ def get_planet_positions(utc_datetime, latitude=0.0, longitude=0.0):
     positions = {}
     for name, key in PLANET_KEYS.items():
         body = planets[key]
-        astrometric = observer.at(t).observe(body).apparent()
-        ecliptic = astrometric.ecliptic_latlon()
+        ecliptic = observer.at(t).observe(body).ecliptic_latlon()
+
         lon = ecliptic[1].degrees
 
 
