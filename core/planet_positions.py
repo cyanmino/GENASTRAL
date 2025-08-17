@@ -1,4 +1,3 @@
-# planet_positions.py
 from skyfield.api import load, Topos
 from datetime import datetime
 
@@ -7,8 +6,8 @@ def get_planet_positions(utc_datetime, latitude=0.0, longitude=0.0):
     t = ts.utc(utc_datetime.year, utc_datetime.month, utc_datetime.day,
                utc_datetime.hour, utc_datetime.minute)
 
-    planets = load('de421.bsp')  # Se descarga automáticamente si no existe
-    observer = planets['earth'].topos(latitude_degrees=latitude, longitude_degrees=longitude)
+    planets = load('de421.bsp')  # Descarga automática si no existe
+    observer = planets['earth'] + Topos(latitude_degrees=latitude, longitude_degrees=longitude)
 
     planet_keys = {
         "Sun": "sun",
@@ -25,7 +24,7 @@ def get_planet_positions(utc_datetime, latitude=0.0, longitude=0.0):
 
     positions = {}
     for name, key in planet_keys.items():
-        astrometric = observer.observe(planets[key]).apparent()
+        astrometric = observer.at(t).observe(planets[key]).apparent()
         ecliptic = astrometric.ecliptic_latlon()
         lon = ecliptic[1].degrees
         positions[name] = {
