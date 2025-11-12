@@ -1,0 +1,13 @@
+import Astronomy from "astronomy-engine";
+const DEG2RAD=Math.PI/180, RAD2DEG=180/Math.PI;
+const observer={lat:-34.587, lon:-58.407};
+const time=new Astronomy.AstroTime(new Date('1993-10-25T15:25:00Z'));
+const gst=Astronomy.SiderealTime(time);
+const lstDeg=((gst+observer.lon/15)%24+24)%24*15;
+const epsilon=Astronomy.e_tilt(time).tobl*DEG2RAD;
+const phi=observer.lat*DEG2RAD;
+const lst=lstDeg*DEG2RAD;
+const numerator=-Math.cos(lst);
+const denominator=Math.sin(lst)*Math.cos(epsilon)-Math.tan(phi)*Math.sin(epsilon);
+const asc=Math.atan2(numerator,denominator)*RAD2DEG;
+console.log('Our asc', (asc+360)%360);

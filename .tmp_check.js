@@ -1,0 +1,27 @@
+const Astronomy = require('astronomy-engine');
+const DEG2RAD = Math.PI/180;
+const RAD2DEG = 180/Math.PI;
+const obs = new Astronomy.Observer(-34.587, -58.407, 0);
+const time = new Astronomy.AstroTime(new Date('1993-10-25T15:25:00Z'));
+const lst = Astronomy.SiderealTime(time) + obs.longitude/15;
+const lstDeg = ((lst%24)+24)%24*15;
+console.log('LST deg', lstDeg);
+// Use our computeAscendant function? I'll reconstruct quickly.
+const epsilon = Astronomy.e_tilt(time).tobl*DEG2RAD;
+const computeAsc = () => {
+  const lstRad = lstDeg*DEG2RAD;
+  const phi = obs.latitude*DEG2RAD;
+  const sinE = Math.sin(epsilon);
+  const cosE = Math.cos(epsilon);
+  const numerator = -Math.cos(lstRad);
+  const denominator = Math.sin(lstRad)*cosE - Math.tan(phi)*sinE;
+  const asc = Math.atan2(numerator, denominator)*RAD2DEG;
+  return (asc+360)%360;
+};
+const asc = computeAsc();
+console.log('Asc long', asc);
+const ascRA = Math.atan2(Math.sin(asc*DEG2RAD)*Math.cos(epsilon), Math.cos(asc*DEG2RAD))*RAD2DEG;
+const mcRA = lstDeg;
+let diff = (mcRA - ascRA);
+while(diff<0) diff+=360;
+console.log('RA Asc', ascRA, 'RA MC', mcRA, 'diff', diff);

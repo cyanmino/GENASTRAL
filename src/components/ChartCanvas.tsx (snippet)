@@ -1,0 +1,17 @@
+const disposeChartGroup = (group: THREE.Object3D) => {
+  const textures: THREE.Texture[] = Array.isArray(group.userData?.textures) ? group.userData.textures : [];
+  group.traverse((child) => {
+    const mesh = child as THREE.Mesh;
+    if (mesh.geometry) {
+      mesh.geometry.dispose();
+    }
+    const material = (mesh as THREE.Mesh).material;
+    if (Array.isArray(material)) {
+      material.forEach((mat) => mat && (mat as THREE.Material).dispose());
+    } else if (material) {
+      (material as THREE.Material).dispose();
+    }
+  });
+  textures.forEach((texture) => texture.dispose());
+  group.userData.textures = [];
+};

@@ -1,0 +1,1 @@
+"""Utility configuration for GENASTRAL."""
