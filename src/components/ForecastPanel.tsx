@@ -43,7 +43,7 @@ export const ForecastPanel = () => {
         </div>
         {chart && (
           <button
-            type: "button"
+            type="button"
             onClick={() => setShowGeneric(true)}
             style={{
               padding: "0.45rem 0.75rem",
