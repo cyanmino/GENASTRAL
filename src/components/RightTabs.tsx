@@ -1,7 +1,6 @@
 import { InfoPanel } from "./InfoPanel";
 import { CustomPointPanel } from "./CustomPointPanel";
 import { SynastryPanel } from "./SynastryPanel";
-import { ForecastPanel } from "./ForecastPanel";
 import { useChartStore } from "../state/chartStore";
 
 type TabKey = "info" | "custom" | "synastry" | "forecast";
@@ -52,11 +51,7 @@ export const RightTabs = () => {
         }}
       >
         <TabButton label="Datos actuales" active={activeTab === "info"} onClick={() => setActiveTab("info")} />
-        <TabButton
-          label="Puntos personalizados"
-          active={activeTab === "custom"}
-          onClick={() => setActiveTab("custom")}
-        />
+        <TabButton label="Puntos personalizados" active={activeTab === "custom"} onClick={() => setActiveTab("custom")} />
         <TabButton label="Sinastría" active={activeTab === "synastry"} onClick={() => setActiveTab("synastry")} />
         <TabButton label="Pronóstico" active={activeTab === "forecast"} onClick={() => setActiveTab("forecast")} />
       </div>
@@ -64,7 +59,7 @@ export const RightTabs = () => {
         {activeTab === "info" && <InfoPanel />}
         {activeTab === "custom" && <CustomPointPanel />}
         {activeTab === "synastry" && <SynastryPanel />}
-        {activeTab === "forecast" && <ForecastPanel />}
+        {activeTab === "forecast" && null}
       </div>
     </div>
   );

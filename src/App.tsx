@@ -1,8 +1,8 @@
 import { InputPanel } from "./components/InputPanel";
 import { ChartCanvas } from "./components/ChartCanvas";
+import { RightTabs } from "./components/RightTabs";
 import { ProfileManager } from "./components/ProfileManager";
 import { DisplayControls } from "./components/DisplayControls";
-import { RightTabs } from "./components/RightTabs";
 import { ForecastPanel } from "./components/ForecastPanel";
 import { useChartStore } from "./state/chartStore";
 
