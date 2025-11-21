@@ -1,13 +1,14 @@
 import { InputPanel } from "./components/InputPanel";
 import { ChartCanvas } from "./components/ChartCanvas";
-import { InfoPanel } from "./components/InfoPanel";
 import { ProfileManager } from "./components/ProfileManager";
 import { DisplayControls } from "./components/DisplayControls";
-import { CustomPointPanel } from "./components/CustomPointPanel";
+import { RightTabs } from "./components/RightTabs";
+import { ForecastPanel } from "./components/ForecastPanel";
 import { useChartStore } from "./state/chartStore";
 
 const App = () => {
   const fullscreen = useChartStore((state) => state.fullscreen);
+  const rightTab = useChartStore((state) => state.rightTab);
 
   if (fullscreen) {
     return (
@@ -24,12 +25,17 @@ const App = () => {
         <InputPanel />
       </div>
       <div className="app-column">
-        <ChartCanvas />
-        <DisplayControls />
+        {rightTab === "forecast" ? (
+          <ForecastPanel />
+        ) : (
+          <>
+            <ChartCanvas />
+            <DisplayControls />
+          </>
+        )}
       </div>
       <div className="app-column">
-        <InfoPanel />
-        <CustomPointPanel />
+        <RightTabs />
       </div>
     </div>
   );

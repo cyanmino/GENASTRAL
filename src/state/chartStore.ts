@@ -33,6 +33,7 @@ interface ChartStore {
   showTransits: boolean;
   fullscreen: boolean;
   customPoints: CustomPointDef[];
+  rightTab: "info" | "custom" | "synastry" | "forecast";
   setInput: (partial: Partial<ChartInput>) => void;
   toggleLayer: (layer: keyof LayerState) => void;
   toggleBodyVisibility: (id: string) => void;
@@ -46,6 +47,7 @@ interface ChartStore {
   removeCustomPoint: (id: string) => void;
   clearActiveProfile: () => void;
   startNewProfile: () => void;
+  setRightTab: (tab: "info" | "custom" | "synastry" | "forecast") => void;
 }
 
 const defaultInput: ChartInput = {
@@ -161,6 +163,7 @@ export const useChartStore = create<ChartStore>()(
     showTransits: false,
     fullscreen: false,
     customPoints: [],
+    rightTab: "info",
     setInput: (partial) =>
       set((state) => {
         const merged = { ...state.input, ...partial };
@@ -262,6 +265,7 @@ export const useChartStore = create<ChartStore>()(
         false,
         "chart/startNewProfile"
       );
-    }
+    },
+    setRightTab: (tab) => set({ rightTab: tab })
   }))
 );
