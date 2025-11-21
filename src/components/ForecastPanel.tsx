@@ -33,7 +33,7 @@ export const ForecastPanel = () => {
   }, [chart, showGeneric]);
 
   return (
-    <div className="panel" style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+    <div className="panel" style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h2 style={{ margin: 0 }}>Pronóstico</h2>
@@ -61,7 +61,7 @@ export const ForecastPanel = () => {
         )}
       </div>
 
-      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "stretch" }}>
+      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "stretch", flex: 1, minHeight: 0 }}>
         {items.map((item) => (
           <div
             key={item.day}
@@ -74,7 +74,8 @@ export const ForecastPanel = () => {
               display: "flex",
               flexDirection: "column",
               gap: "0.6rem",
-              minHeight: "320px"
+              flex: 1,
+              minHeight: "100%"
             }}
           >
             <strong style={{ display: "block", fontSize: "1.25rem", color: "#bfdbfe", lineHeight: 1.1 }}>{item.day}</strong>
