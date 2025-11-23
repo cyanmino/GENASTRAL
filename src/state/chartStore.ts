@@ -73,6 +73,7 @@ interface ChartStore {
   computeSolarReturn: (year?: number) => void;
   setSolarView: (mode: SolarViewMode) => void;
   addAnnualPeriod: (period: Omit<AnnualPeriod, "id">) => void;
+  updateAnnualPeriod: (period: AnnualPeriod) => void;
   removeAnnualPeriod: (year: number, id: string) => void;
 }
 
@@ -323,6 +324,17 @@ export const useChartStore = create<ChartStore>()(
         const targetYear = period.year;
         const withId: AnnualPeriod = { ...period, id: crypto.randomUUID() };
         const next = upsertPeriod(state.annualPeriods, targetYear, withId);
+        saveAnnualPeriods(next);
+        return { annualPeriods: next };
+      }),
+    updateAnnualPeriod: (period) =>
+      set((state) => {
+        const next = {
+          ...state.annualPeriods,
+          [period.year]: (state.annualPeriods[period.year] ?? []).map((entry) =>
+            entry.id === period.id ? { ...entry, ...period } : entry
+          )
+        };
         saveAnnualPeriods(next);
         return { annualPeriods: next };
       }),

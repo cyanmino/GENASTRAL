@@ -13,6 +13,7 @@ export const SolarReturnView = () => {
   const activeProfileId = useChartStore((state) => state.activeProfileId);
   const annualPeriods = useChartStore((state) => state.annualPeriods);
   const addAnnualPeriod = useChartStore((state) => state.addAnnualPeriod);
+  const updateAnnualPeriod = useChartStore((state) => state.updateAnnualPeriod);
   const removeAnnualPeriod = useChartStore((state) => state.removeAnnualPeriod);
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export const SolarReturnView = () => {
           year={solarYear}
           periods={periodsForYear}
           onAddPeriod={addAnnualPeriod}
+          onUpdatePeriod={updateAnnualPeriod}
           onRemovePeriod={removeAnnualPeriod}
         />
       )}

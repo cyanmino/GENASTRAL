@@ -75,6 +75,7 @@ export type AnnualPeriodCategory =
   | "work-negative"
   | "health-positive"
   | "health-negative"
+  | "aspect-strong"
   | "spiritual-positive"
   | "spiritual-negative";
 
