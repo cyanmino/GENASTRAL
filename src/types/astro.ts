@@ -74,7 +74,9 @@ export type AnnualPeriodCategory =
   | "work-positive"
   | "work-negative"
   | "health-positive"
-  | "health-negative";
+  | "health-negative"
+  | "spiritual-positive"
+  | "spiritual-negative";
 
 export interface AnnualPeriod {
   id: string;

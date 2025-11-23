@@ -25,7 +25,9 @@ const PERIOD_COLORS: Record<AnnualPeriodCategory, { label: string; color: string
   "work-positive": { label: "Trabajo favorable", color: "#facc15", text: "#1e293b" },
   "work-negative": { label: "Trabajo desfavorable", color: "#92400e", text: "#f8fafc" },
   "health-positive": { label: "Salud favorable", color: "#bae6fd", text: "#0f172a" },
-  "health-negative": { label: "Salud desfavorable", color: "#1e3a8a", text: "#e2e8f0" }
+  "health-negative": { label: "Salud desfavorable", color: "#1e3a8a", text: "#e2e8f0" },
+  "spiritual-positive": { label: "Espiritualidad favorable", color: "#ffffff", text: "#0f172a" },
+  "spiritual-negative": { label: "Espiritualidad desfavorable", color: "#000000", text: "#f8fafc" }
 };
 
 interface SolarAnnualCalendarProps {

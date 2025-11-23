@@ -12,7 +12,15 @@ import type {
 } from "../types/astro";
 import { BODY_CONFIG, BODY_LABELS, LAYER_DEFAULTS } from "../lib/config";
 import { buildChart } from "../lib/astro/chartBuilder";
-import { loadLastInput, loadProfiles, saveLastInput, saveProfiles, SavedProfile } from "../lib/storage";
+import {
+  loadLastInput,
+  loadProfiles,
+  saveLastInput,
+  saveProfiles,
+  SavedProfile,
+  loadAnnualPeriods,
+  saveAnnualPeriods
+} from "../lib/storage";
 import { buildSolarReturnData, upsertPeriod } from "../lib/solarReturn";
 
 export type CustomShape = "sphere" | "cube" | "octahedron" | "pyramid";
@@ -186,7 +194,7 @@ export const useChartStore = create<ChartStore>()(
     solarReturn: undefined,
     solarView: "mandala",
     solarError: undefined,
-    annualPeriods: {},
+    annualPeriods: loadAnnualPeriods(),
     setInput: (partial) =>
       set((state) => {
         const merged = { ...state.input, ...partial };
@@ -314,14 +322,18 @@ export const useChartStore = create<ChartStore>()(
       set((state) => {
         const targetYear = period.year;
         const withId: AnnualPeriod = { ...period, id: crypto.randomUUID() };
-        return { annualPeriods: upsertPeriod(state.annualPeriods, targetYear, withId) };
+        const next = upsertPeriod(state.annualPeriods, targetYear, withId);
+        saveAnnualPeriods(next);
+        return { annualPeriods: next };
       }),
     removeAnnualPeriod: (year, id) =>
-      set((state) => ({
-        annualPeriods: {
+      set((state) => {
+        const next = {
           ...state.annualPeriods,
           [year]: (state.annualPeriods[year] ?? []).filter((entry) => entry.id !== id)
-        }
-      }))
+        };
+        saveAnnualPeriods(next);
+        return { annualPeriods: next };
+      })
   }))
 );
