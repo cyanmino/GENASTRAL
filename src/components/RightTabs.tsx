@@ -1,9 +1,10 @@
 import { InfoPanel } from "./InfoPanel";
 import { CustomPointPanel } from "./CustomPointPanel";
 import { SynastryPanel } from "./SynastryPanel";
+import { SolarReturnPanel } from "./SolarReturnPanel";
 import { useChartStore } from "../state/chartStore";
 
-type TabKey = "info" | "custom" | "synastry" | "forecast";
+type TabKey = "info" | "custom" | "synastry" | "forecast" | "solar";
 
 const TabButton = ({
   label,
@@ -54,15 +55,15 @@ export const RightTabs = () => {
         <TabButton label="Puntos personalizados" active={activeTab === "custom"} onClick={() => setActiveTab("custom")} />
         <TabButton label="Sinastría" active={activeTab === "synastry"} onClick={() => setActiveTab("synastry")} />
         <TabButton label="Pronóstico" active={activeTab === "forecast"} onClick={() => setActiveTab("forecast")} />
+        <TabButton label="Revolución solar" active={activeTab === "solar"} onClick={() => setActiveTab("solar")} />
       </div>
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
         {activeTab === "info" && <InfoPanel />}
         {activeTab === "custom" && <CustomPointPanel />}
         {activeTab === "synastry" && <SynastryPanel />}
         {activeTab === "forecast" && null}
+        {activeTab === "solar" && <SolarReturnPanel />}
       </div>
     </div>
   );
 };
-
-

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { useChartStore } from "../state/chartStore";
-import { CelestialBody } from "../types/astro";
+import { CelestialBody, ChartData } from "../types/astro";
 import { BODY_LABELS, ASPECTS } from "../lib/config";
 
 const DEG2RAD = Math.PI / 180;
@@ -692,7 +692,7 @@ const createChartGroup = (
   return { group, positions, rotating };
 };
 
-export const ChartCanvas = () => {
+export const ChartCanvas = ({ chartOverride }: { chartOverride?: ChartData }) => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer>();
   const sceneRef = useRef<THREE.Scene>();
@@ -703,7 +703,8 @@ export const ChartCanvas = () => {
   const skyDomeRef = useRef<THREE.Mesh | null>(null);
   const resizeObserverRef = useRef<ResizeObserver>();
   const [rendererReady, setRendererReady] = useState(false);
-  const chart = useChartStore((state) => state.chart);
+  const storeChart = useChartStore((state) => state.chart);
+  const chart = chartOverride ?? storeChart;
   const layers = useChartStore((state) => state.layers);
   const visibleBodies = useChartStore((state) => state.visibleBodies);
   const fullscreen = useChartStore((state) => state.fullscreen);

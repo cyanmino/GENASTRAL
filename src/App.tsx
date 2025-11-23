@@ -4,6 +4,7 @@ import { RightTabs } from "./components/RightTabs";
 import { ProfileManager } from "./components/ProfileManager";
 import { DisplayControls } from "./components/DisplayControls";
 import { ForecastPanel } from "./components/ForecastPanel";
+import { SolarReturnView } from "./components/SolarReturnView";
 import { useChartStore } from "./state/chartStore";
 
 const App = () => {
@@ -27,6 +28,8 @@ const App = () => {
       <div className="app-column" style={{ height: "100vh" }}>
         {rightTab === "forecast" ? (
           <ForecastPanel />
+        ) : rightTab === "solar" ? (
+          <SolarReturnView />
         ) : (
           <>
             <ChartCanvas />

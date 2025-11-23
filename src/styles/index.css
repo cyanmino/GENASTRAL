@@ -139,3 +139,83 @@ body {
   border-radius: 0;
   height: 100vh;
 }
+
+.annual-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.annual-calendar__month {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 140px;
+}
+
+.annual-calendar__month-header {
+  font-weight: 700;
+  color: #bfdbfe;
+}
+
+.annual-calendar__periods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.annual-calendar__placeholder {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.annual-calendar__period {
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+.annual-calendar__period-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+}
+
+.annual-calendar__period-title button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-weight: 700;
+}
+
+.annual-calendar__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.annual-calendar__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+  font-size: 0.9rem;
+}
+
+.annual-calendar__swatch {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+}

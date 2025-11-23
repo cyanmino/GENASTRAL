@@ -1,12 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
 import { useChartStore } from "../state/chartStore";
 
-type ForecastItem = { day: string; window: string; text: string };
+type ForecastVisual = { src: string; alt: string };
+type ForecastItem = { day: string; window: string; text: string; visuals: ForecastVisual[] };
 
 const GENERIC_ITEMS: ForecastItem[] = [
-  { day: "Martes", window: "3 al 5 de noviembre", text: "Pronóstico genérico: Venus en sextil favorece acuerdos y creatividad." },
-  { day: "Miércoles", window: "6 de noviembre", text: "Marte activo: evita impulsividad, enfoca la acción con claridad." },
-  { day: "Jueves", window: "7 de noviembre", text: "Luna creciente: avanza en proyectos personales y logística." }
+  {
+    day: "Martes",
+    window: "3 al 5 de noviembre",
+    text: "Pronostico generico: Venus en sextil favorece acuerdos y creatividad.",
+    visuals: [
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/sextile.png", alt: "Aspecto sextil" }
+    ]
+  },
+  {
+    day: "Miercoles",
+    window: "6 de noviembre",
+    text: "Marte activo: evita impulsividad, enfoca la accion con claridad.",
+    visuals: [{ src: "/assets/forecast/planets/mars.png", alt: "Marte" }]
+  },
+  {
+    day: "Jueves",
+    window: "7 de noviembre",
+    text: "Luna creciente: avanza en proyectos personales y logistica.",
+    visuals: [{ src: "/assets/forecast/planets/moon.png", alt: "Luna" }]
+  }
 ];
 
 export const ForecastPanel = () => {
@@ -25,10 +44,17 @@ export const ForecastPanel = () => {
       {
         day: "Martes",
         window: "3 al 5 de noviembre",
-        text: `Para tu ${sunLabel}, foco en crecimiento personal y visibilidad.`
+        text: `Para tu ${sunLabel}, foco en crecimiento personal y visibilidad.`,
+        visuals: [{ src: "/assets/forecast/planets/sun.png", alt: "Sol" }]
       },
       GENERIC_ITEMS[1],
-      GENERIC_ITEMS[2]
+      {
+        ...GENERIC_ITEMS[2],
+        visuals: [
+          { src: "/assets/forecast/planets/moon.png", alt: "Luna" },
+          { src: "/assets/forecast/aspects/trine.png", alt: "Aspecto trigono" }
+        ]
+      }
     ];
   }, [chart, showGeneric]);
 
@@ -36,10 +62,10 @@ export const ForecastPanel = () => {
     <div className="panel" style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h2 style={{ margin: 0 }}>Pronóstico</h2>
-          {!chart && <span style={{ color: "#94a3b8" }}>Vista genérica</span>}
+          <h2 style={{ margin: 0 }}>Pronostico</h2>
+          {!chart && <span style={{ color: "#94a3b8" }}>Vista generica</span>}
           {chart && !showGeneric && <span style={{ color: "#22d3ee" }}>Adaptado a la carta cargada</span>}
-          {chart && showGeneric && <span style={{ color: "#94a3b8" }}>Tránsito actual</span>}
+          {chart && showGeneric && <span style={{ color: "#94a3b8" }}>Transito actual</span>}
         </div>
         {chart && (
           <button
@@ -56,7 +82,7 @@ export const ForecastPanel = () => {
               minWidth: "150px"
             }}
           >
-            Tránsito actual
+            Transito actual
           </button>
         )}
       </div>
@@ -84,19 +110,25 @@ export const ForecastPanel = () => {
               style={{
                 flex: 1,
                 minHeight: "160px",
-                background: "radial-gradient(circle at 50% 40%, rgba(148,163,184,0.25), rgba(15,23,42,0))",
+                background: "radial-gradient(circle at 50% 40%, rgba(148,163,184,0.12), rgba(15,23,42,0))",
                 border: "1px dashed rgba(148,163,184,0.35)",
                 borderRadius: "0.65rem",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#cbd5f5",
-                fontSize: "0.9rem",
-                textAlign: "center",
                 padding: "0.5rem"
               }}
             >
-              Espacio para la forma 3D / aspecto del día
+              <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", justifyContent: "center", flexWrap: "wrap" }}>
+                {item.visuals.map((visual) => (
+                  <img
+                    key={visual.src}
+                    src={visual.src}
+                    alt={visual.alt}
+                    style={{ maxWidth: "100px", maxHeight: "120px", objectFit: "contain" }}
+                  />
+                ))}
+              </div>
             </div>
             <div style={{ color: "#e2e8f0", marginTop: "auto", fontSize: "0.95rem", lineHeight: 1.4 }}>{item.text}</div>
           </div>

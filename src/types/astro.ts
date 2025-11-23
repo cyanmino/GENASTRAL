@@ -63,3 +63,46 @@ export interface ChartData {
   aspects: Aspect[];
   metadata: ChartMetadata;
 }
+
+export type SolarViewMode = "mandala" | "calendar";
+
+export type AnnualPeriodCategory =
+  | "economy-positive"
+  | "economy-negative"
+  | "love-positive"
+  | "love-negative"
+  | "work-positive"
+  | "work-negative"
+  | "health-positive"
+  | "health-negative";
+
+export interface AnnualPeriod {
+  id: string;
+  year: number;
+  start: string; // YYYY-MM-DD
+  end: string; // YYYY-MM-DD
+  colorKey: AnnualPeriodCategory;
+  note?: string;
+}
+
+export interface SolarMidpoint {
+  label: string;
+  longitude: number;
+  signIndex: number;
+  degreeInSign: number;
+  minuteInSign: number;
+}
+
+export interface SolarAspectComparison {
+  solarBody: string;
+  natalBody: string;
+  aspect: string;
+  orb: number;
+}
+
+export interface SolarReturnData {
+  year: number;
+  chart: ChartData;
+  midpoints: SolarMidpoint[];
+  natalAspects: SolarAspectComparison[];
+}

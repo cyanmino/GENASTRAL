@@ -2,10 +2,18 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { DateTime } from "luxon";
 import tzlookup from "tz-lookup";
-import type { ChartData, ChartInput, CelestialBody } from "../types/astro";
+import type {
+  AnnualPeriod,
+  ChartData,
+  ChartInput,
+  CelestialBody,
+  SolarReturnData,
+  SolarViewMode
+} from "../types/astro";
 import { BODY_CONFIG, BODY_LABELS, LAYER_DEFAULTS } from "../lib/config";
 import { buildChart } from "../lib/astro/chartBuilder";
 import { loadLastInput, loadProfiles, saveLastInput, saveProfiles, SavedProfile } from "../lib/storage";
+import { buildSolarReturnData, upsertPeriod } from "../lib/solarReturn";
 
 export type CustomShape = "sphere" | "cube" | "octahedron" | "pyramid";
 
@@ -33,7 +41,12 @@ interface ChartStore {
   showTransits: boolean;
   fullscreen: boolean;
   customPoints: CustomPointDef[];
-  rightTab: "info" | "custom" | "synastry" | "forecast";
+  rightTab: "info" | "custom" | "synastry" | "forecast" | "solar";
+  solarYear: number;
+  solarReturn?: SolarReturnData;
+  solarView: SolarViewMode;
+  solarError?: string;
+  annualPeriods: Record<number, AnnualPeriod[]>;
   setInput: (partial: Partial<ChartInput>) => void;
   toggleLayer: (layer: keyof LayerState) => void;
   toggleBodyVisibility: (id: string) => void;
@@ -47,7 +60,12 @@ interface ChartStore {
   removeCustomPoint: (id: string) => void;
   clearActiveProfile: () => void;
   startNewProfile: () => void;
-  setRightTab: (tab: "info" | "custom" | "synastry" | "forecast") => void;
+  setRightTab: (tab: "info" | "custom" | "synastry" | "forecast" | "solar") => void;
+  setSolarYear: (year: number) => void;
+  computeSolarReturn: (year?: number) => void;
+  setSolarView: (mode: SolarViewMode) => void;
+  addAnnualPeriod: (period: Omit<AnnualPeriod, "id">) => void;
+  removeAnnualPeriod: (year: number, id: string) => void;
 }
 
 const defaultInput: ChartInput = {
@@ -164,6 +182,11 @@ export const useChartStore = create<ChartStore>()(
     fullscreen: false,
     customPoints: [],
     rightTab: "info",
+    solarYear: new Date().getFullYear(),
+    solarReturn: undefined,
+    solarView: "mandala",
+    solarError: undefined,
+    annualPeriods: {},
     setInput: (partial) =>
       set((state) => {
         const merged = { ...state.input, ...partial };
@@ -266,6 +289,39 @@ export const useChartStore = create<ChartStore>()(
         "chart/startNewProfile"
       );
     },
-    setRightTab: (tab) => set({ rightTab: tab })
+    setRightTab: (tab) => set({ rightTab: tab }),
+    setSolarYear: (year) => set({ solarYear: year, solarError: undefined }),
+    computeSolarReturn: (year) => {
+      const targetYear = year ?? get().solarYear;
+      const baseInput = get().input;
+      try {
+        const natalChart = get().chart ?? buildChart(baseInput);
+        const solarReturn = buildSolarReturnData(baseInput, targetYear, natalChart);
+        set({
+          solarYear: targetYear,
+          solarReturn,
+          solarError: undefined,
+          solarView: "mandala"
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Error al calcular la revolución solar:", error);
+        set({ solarError: message, solarReturn: undefined });
+      }
+    },
+    setSolarView: (mode) => set({ solarView: mode }),
+    addAnnualPeriod: (period) =>
+      set((state) => {
+        const targetYear = period.year;
+        const withId: AnnualPeriod = { ...period, id: crypto.randomUUID() };
+        return { annualPeriods: upsertPeriod(state.annualPeriods, targetYear, withId) };
+      }),
+    removeAnnualPeriod: (year, id) =>
+      set((state) => ({
+        annualPeriods: {
+          ...state.annualPeriods,
+          [year]: (state.annualPeriods[year] ?? []).filter((entry) => entry.id !== id)
+        }
+      }))
   }))
 );
