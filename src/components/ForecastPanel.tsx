@@ -1,13 +1,36 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DateTime } from "luxon";
+import tzlookup from "tz-lookup";
 import { useChartStore } from "../state/chartStore";
-import { ZODIAC_SIGNS } from "../lib/config";
+import { ASPECTS, BODY_LABELS, ZODIAC_SIGNS } from "../lib/config";
+import { buildChart } from "../lib/astro/chartBuilder";
 
 type ForecastVisual = { src: string; alt: string };
 type ForecastItem = { title: string; window: string; text: string; visuals: ForecastVisual[] };
 
+const formatDate = (dt: DateTime) => dt.toFormat("dd 'de' LLLL yyyy");
+
+const aspectDistance = (a: number, b: number) => {
+  const diff = Math.abs(a - b) % 360;
+  return diff > 180 ? 360 - diff : diff;
+};
+
+const planetImage = (id: string) => `/assets/forecast/planets/${id.toLowerCase()}.png`;
+
+const aspectImage = (label: string) => {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("conj")) return "/assets/forecast/aspects/conjunction.png";
+  if (normalized.includes("opos") || normalized.includes("oppos")) return "/assets/forecast/aspects/opposition.png";
+  if (normalized.includes("trig") || normalized.includes("tri")) return "/assets/forecast/aspects/trine.png";
+  if (normalized.includes("cuad") || normalized.includes("square")) return "/assets/forecast/aspects/square.png";
+  if (normalized.includes("sext")) return "/assets/forecast/aspects/sextile.png";
+  if (normalized.includes("quin") || normalized.includes("quinc")) return "/assets/forecast/aspects/quincunx.png";
+  return "/assets/forecast/aspects/sextile.png";
+};
+
 export const ForecastPanel = () => {
   const chart = useChartStore((state) => state.chart);
+  const input = useChartStore((state) => state.input);
   const [showGeneric, setShowGeneric] = useState(false);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -27,38 +50,77 @@ export const ForecastPanel = () => {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
+  const computeTransitAspects = () => {
+    try {
+      const zone = input.timezoneId ?? tzlookup(input.latitude, input.longitude);
+      const now = DateTime.now().setZone(zone);
+      const transitInput = {
+        ...input,
+        date: now.toISODate() ?? input.date,
+        time: now.toFormat("HH:mm"),
+        timezoneOffset: now.offset,
+        timezoneId: zone
+      };
+      const transitChart = buildChart(transitInput);
+      if (!chart) return [];
+      const transitBodies = transitChart.bodies.filter((b) => b.category === "planet");
+      const natalBodies = chart.bodies.filter((b) => b.category === "planet");
+      const getName = (id: string, fallback?: string) => BODY_LABELS[id] ?? fallback ?? id;
+
+      const results: { transit: string; natal: string; label: string; orb: number; transitId: string; natalId: string }[] = [];
+      transitBodies.forEach((t) => {
+        natalBodies.forEach((n) => {
+          const dist = aspectDistance(t.longitude, n.longitude);
+          ASPECTS.forEach((asp) => {
+            const orb = Math.abs(dist - asp.angle);
+            if (orb <= asp.orb) {
+              results.push({
+                transit: getName(t.id, t.label),
+                natal: getName(n.id, n.label),
+                label: asp.label,
+                orb: Number(orb.toFixed(2)),
+                transitId: t.id,
+                natalId: n.id
+              });
+            }
+          });
+        });
+      });
+      return results.sort((a, b) => a.orb - b.orb);
+    } catch {
+      return [];
+    }
+  };
+
   const items = useMemo(() => {
     const now = DateTime.local().setLocale("es");
     const weekStart = now.set({ weekday: 1 }).startOf("day");
     const weekEnd = weekStart.plus({ days: 6 }).endOf("day");
-    const fmt = (dt: DateTime) => dt.toFormat("dd 'de' LLLL yyyy");
-    const commonWindow = `${fmt(weekStart)} · ${fmt(weekEnd)}`;
+    const commonWindow = `${formatDate(weekStart)} · ${formatDate(weekEnd)}`;
 
-    // Base general
     const baseItems: ForecastItem[] = [
       {
-        title: "Mercurio retrógrado",
+        title: "Mercurio retrogrado",
         window: commonWindow,
-        text:
-          "Semana de revisión e introspección: ajustes en comunicación, contratos y motivaciones profundas. Evita lanzamientos finales hasta pasar el retrógrado.",
+        text: "Revision e introspeccion: ajustes en comunicacion y motivaciones profundas. Evita lanzamientos finales hasta pasar el retrogrado.",
         visuals: [
           { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-          { src: "/assets/forecast/aspects/quadrature.png", alt: "Retrógrado / revisión" }
+          { src: "/assets/forecast/aspects/quadrature.png", alt: "Retrogrado / revision" }
         ]
       },
       {
-        title: "Saturno retrógrado",
+        title: "Saturno retrogrado",
         window: commonWindow,
-        text: "Revisión de límites y responsabilidades. Cierra pendientes y ordena rutinas.",
+        text: "Revisa limites y responsabilidades. Cierra pendientes y ordena rutinas.",
         visuals: [
           { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" },
-          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo / revisión" }
+          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo / revision" }
         ]
       },
       {
-        title: "Urano retrógrado",
+        title: "Urano retrogrado",
         window: commonWindow,
-        text: "Cambios en valores, recursos y estabilidad. Ajusta presupuestos y evita saltos bruscos.",
+        text: "Cambios en valores y estabilidad. Ajusta presupuestos y evita saltos bruscos.",
         visuals: [
           { src: "/assets/forecast/planets/uranus.png", alt: "Urano" },
           { src: "/assets/forecast/aspects/quincunx.png", alt: "Ajustes" }
@@ -66,76 +128,96 @@ export const ForecastPanel = () => {
       }
     ];
 
-    // Si no hay carta o se pide genérico, devolver base
     if (!chart || showGeneric) {
       return baseItems;
     }
 
-    // Personalizado con la carta cargada: lista de aspectos solicitados
+    const transitAspects = computeTransitAspects();
+    const listed = transitAspects.slice(0, 45);
+    const remaining = Math.max(transitAspects.length - listed.length, 0);
+    const aspectsText = listed
+      .map((a) => `${a.transit} ${a.label} ${a.natal} (orb ${a.orb.toFixed(1)}°)`)
+      .join(" · ")
+      .concat(remaining > 0 ? ` · +${remaining} aspectos mas` : "");
+
     const personalized: ForecastItem[] = [
       {
-        title: "Venus tránsito · conjunción · Marte natal",
+        title: "Venus transito · conjuncion · Marte natal",
         window: "Hasta domingo",
-        text: "Atracción, magnetismo y acciones guiadas por el deseo. Canaliza en proyectos creativos o vínculos.",
+        text: "Atraccion y accion guiada por el deseo. Canaliza en proyectos creativos o vinculos.",
         visuals: [
           { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjuncion" },
           { src: "/assets/forecast/planets/mars.png", alt: "Marte natal" }
         ]
       },
       {
-        title: "Venus tránsito · conjunción · Mercurio natal",
+        title: "Venus transito · conjuncion · Mercurio natal",
         window: "Hasta 2 de diciembre",
-        text: "Comunicación afectiva, acuerdos y diplomacia. Buen momento para negociar con empatía.",
+        text: "Comunicacion afectiva y acuerdos. Negocia con empatia.",
         visuals: [
           { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjuncion" },
           { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio natal" }
         ]
       },
       {
-        title: "Mercurio tránsito · conjunción · Mercurio natal",
+        title: "Mercurio transito · conjuncion · Mercurio natal",
         window: "Hasta 13 de diciembre",
-        text: "Revisión profunda de ideas y contratos. Ajusta detalles y firma sólo lo necesario.",
+        text: "Revisiones de ideas y contratos. Ajusta detalles y firma solo lo necesario.",
         visuals: [
-          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio tránsito" },
-          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio transito" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjuncion" },
           { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio natal" }
         ]
       },
       {
-        title: "Mercurio tránsito · conjunción · Marte natal",
+        title: "Mercurio transito · conjuncion · Marte natal",
         window: "Hasta 11 de diciembre",
-        text: "Palabras con fuerza: cuida la impulsividad al hablar, usa la energía para avanzar tareas.",
+        text: "Palabras con fuerza: cuida la impulsividad al hablar, usa la energia para avanzar tareas.",
         visuals: [
-          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio tránsito" },
-          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio transito" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjuncion" },
           { src: "/assets/forecast/planets/mars.png", alt: "Marte natal" }
         ]
       },
       {
-        title: "Venus tránsito · conjunción · Plutón natal",
+        title: "Venus transito · conjuncion · Pluton natal",
         window: "Hasta 4 de diciembre",
-        text: "Intensidad emocional y vínculos. Profundiza con honestidad y evita manipulación.",
+        text: "Intensidad emocional y vinculos. Profundiza con honestidad y evita manipulacion.",
         visuals: [
-          { src: "/assets/forecast/planets/venus.png", alt: "Venus tránsito" },
-          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-          { src: "/assets/forecast/planets/pluto.png", alt: "Plutón natal" }
+          { src: "/assets/forecast/planets/venus.png", alt: "Venus transito" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjuncion" },
+          { src: "/assets/forecast/planets/pluto.png", alt: "Pluton natal" }
         ]
       },
-      {
-        title: "+45 aspectos adicionales",
-        window: "En ventana vigente",
-        text: "Más aspectos están activos; revisa el detalle completo en la carta para priorizar.",
+    ];
+
+    const aspectCards: ForecastItem[] = listed.map((a) => ({
+      title: `${a.transit} ${a.label} ${a.natal}`,
+      window: `${formatDate(now.startOf("day"))} · ${formatDate(now.endOf("day"))}`,
+      text: `Orb ${a.orb.toFixed(1)}°. Cruce tránsito/natal.`,
+      visuals: [
+        { src: planetImage(a.transitId), alt: a.transit },
+        { src: aspectImage(a.label), alt: a.label },
+        { src: planetImage(a.natalId), alt: a.natal }
+      ]
+    }));
+
+    if (remaining > 0) {
+      aspectCards.push({
+        title: `+${remaining} aspectos adicionales`,
+        window: `${formatDate(now.startOf("day"))} · ${formatDate(now.endOf("day"))}`,
+        text: "Hay más aspectos activos; revisa el detalle completo en la carta para priorizar.",
         visuals: [
           { src: "/assets/forecast/aspects/trine.png", alt: "Aspectos" },
           { src: "/assets/forecast/aspects/sextile.png", alt: "Aspectos" }
         ]
-      }
-    ];
+      });
+    }
 
-    return personalized;
-  }, [chart, showGeneric]);
+    return [...personalized, ...aspectCards];
+  }, [chart, showGeneric, input]);
 
   return (
     <div className="panel" style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
@@ -188,67 +270,67 @@ export const ForecastPanel = () => {
             paddingBottom: isPortrait ? "0" : "0.5rem"
           }}
         >
-        {items.map((item, idx) => (
-          <div
-            key={`${item.title}-${idx}`}
-            style={{
-              background: "rgba(15,23,42,0.65)",
-              border: "1px solid rgba(148,163,184,0.3)",
-              borderRadius: "0.75rem",
-              padding: "0.75rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.6rem",
-              flex: 1,
-              minWidth: isPortrait ? "100%" : "240px",
-              maxWidth: isPortrait ? "100%" : "260px",
-              boxSizing: "border-box",
-              overflow: "hidden"
-            }}
-          >
-            <strong style={{ display: "block", fontSize: "1.05rem", color: "#bfdbfe", lineHeight: 1.2 }}>{item.title}</strong>
-            <div style={{ color: "#94a3b8" }}>{item.window}</div>
+          {items.map((item, idx) => (
             <div
+              key={`${item.title}-${idx}`}
               style={{
-                flex: 1,
-                minHeight: "160px",
-                background: "radial-gradient(circle at 50% 40%, rgba(148,163,184,0.12), rgba(15,23,42,0))",
-                border: "1px dashed rgba(148,163,184,0.35)",
-                borderRadius: "0.65rem",
+                background: "rgba(15,23,42,0.65)",
+                border: "1px solid rgba(148,163,184,0.3)",
+                borderRadius: "0.75rem",
+                padding: "0.75rem",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "0.5rem",
-                overflow: "hidden",
-                width: "100%"
+                flexDirection: "column",
+                gap: "0.6rem",
+                flex: 1,
+                minWidth: isPortrait ? "100%" : "240px",
+                maxWidth: isPortrait ? "100%" : "260px",
+                boxSizing: "border-box",
+                overflow: "hidden"
               }}
             >
-              <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", justifyContent: "center", flexWrap: "wrap" }}>
-                {item.visuals.map((visual) => (
-                  <img
-                    key={visual.src}
-                    src={visual.src}
-                    alt={visual.alt}
-                    style={{ maxWidth: "100px", maxHeight: "120px", objectFit: "contain", display: "block" }}
-                  />
-                ))}
+              <strong style={{ display: "block", fontSize: "1.05rem", color: "#bfdbfe", lineHeight: 1.2 }}>{item.title}</strong>
+              <div style={{ color: "#94a3b8" }}>{item.window}</div>
+              <div
+                style={{
+                  flex: 1,
+                  minHeight: "160px",
+                  background: "radial-gradient(circle at 50% 40%, rgba(148,163,184,0.12), rgba(15,23,42,0))",
+                  border: "1px dashed rgba(148,163,184,0.35)",
+                  borderRadius: "0.65rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0.5rem",
+                  overflow: "hidden",
+                  width: "100%"
+                }}
+              >
+                <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", justifyContent: "center", flexWrap: "wrap" }}>
+                  {item.visuals.map((visual) => (
+                    <img
+                      key={visual.src}
+                      src={visual.src}
+                      alt={visual.alt}
+                      style={{ maxWidth: "100px", maxHeight: "120px", objectFit: "contain", display: "block" }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div
+                style={{
+                  color: "#e2e8f0",
+                  marginTop: "auto",
+                  fontSize: "0.95rem",
+                  lineHeight: 1.4,
+                  background: "rgba(15,23,42,0.4)",
+                  borderRadius: "0.5rem",
+                  padding: "0.5rem"
+                }}
+              >
+                {item.text}
               </div>
             </div>
-            <div
-              style={{
-                color: "#e2e8f0",
-                marginTop: "auto",
-                fontSize: "0.95rem",
-                lineHeight: 1.4,
-                background: "rgba(15,23,42,0.4)",
-                borderRadius: "0.5rem",
-                padding: "0.5rem"
-              }}
-            >
-              {item.text}
-            </div>
-          </div>
-        ))}
+          ))}
         </div>
         {!isPortrait && (
           <div
