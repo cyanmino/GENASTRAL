@@ -34,15 +34,7 @@ export const ForecastPanel = () => {
     const fmt = (dt: DateTime) => dt.toFormat("dd 'de' LLLL yyyy");
     const commonWindow = `${fmt(weekStart)} · ${fmt(weekEnd)}`;
 
-    const sun = chart?.bodies.find((b) => b.id === "Sun");
-    const moon = chart?.bodies.find((b) => b.id === "Moon");
-    const asc = chart?.bodies.find((b) => b.id === "Ascendente");
-    const mercury = chart?.bodies.find((b) => b.id === "Mercury");
-    const saturn = chart?.bodies.find((b) => b.id === "Saturn");
-    const uranus = chart?.bodies.find((b) => b.id === "Uranus");
-    const signLabel = (body?: { signIndex: number }) =>
-      body ? ZODIAC_SIGNS[body.signIndex] ?? "" : "";
-
+    // Base general
     const baseItems: ForecastItem[] = [
       {
         title: "Mercurio retrógrado",
@@ -55,19 +47,9 @@ export const ForecastPanel = () => {
         ]
       },
       {
-        title: "Aspectos de Mercurio con planetas lentos",
-        window: commonWindow,
-        text: "Sextiles y contactos a planetas lentos facilitan investigar y ver capas ocultas. Ideal para auditar información.",
-        visuals: [
-          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-          { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
-          { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
-        ]
-      },
-      {
         title: "Saturno retrógrado",
         window: commonWindow,
-        text: "Revisión de límites y responsabilidades emocionales. Cierra pendientes, ordena rutinas y compromisos.",
+        text: "Revisión de límites y responsabilidades. Cierra pendientes y ordena rutinas.",
         visuals: [
           { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" },
           { src: "/assets/forecast/aspects/trine.png", alt: "Flujo / revisión" }
@@ -76,91 +58,78 @@ export const ForecastPanel = () => {
       {
         title: "Urano retrógrado",
         window: commonWindow,
-        text: "Cambios en valores, recursos y estabilidad. Ajusta presupuestos y evita decisiones bruscas en economía.",
+        text: "Cambios en valores, recursos y estabilidad. Ajusta presupuestos y evita saltos bruscos.",
         visuals: [
           { src: "/assets/forecast/planets/uranus.png", alt: "Urano" },
           { src: "/assets/forecast/aspects/quincunx.png", alt: "Ajustes" }
-        ]
-      },
-      {
-        title: "Luna recorriendo la semana",
-        window: `${fmt(weekStart)} · ${fmt(weekEnd)}`,
-        text:
-          "Luna cambia rápido de signo: oscila entre momentos sociales y de introspección. Observa tu energía diaria y ajusta agenda.",
-        visuals: [
-          { src: "/assets/forecast/planets/moon.png", alt: "Luna" },
-          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo" }
-        ]
-      },
-      {
-        title: "Sol en tránsito",
-        window: commonWindow,
-        text: `Enfoque semanal en propósito y visibilidad. Úsalo para clarificar metas y narrativa personal.`,
-        visuals: [
-          { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-          { src: "/assets/forecast/aspects/sextile.png", alt: "Impulso" }
         ]
       }
     ];
 
+    // Si no hay carta o se pide genérico, devolver base
     if (!chart || showGeneric) {
       return baseItems;
     }
 
+    // Personalizado con la carta cargada: lista de aspectos solicitados
     const personalized: ForecastItem[] = [
       {
-        title: `Mercurio retrógrado en ${signLabel(mercury) || "tu carta"}`,
-        window: commonWindow,
-        text: `Revisa comunicaciones y acuerdos en claves ${signLabel(mercury)}. Observa mensajes, mails y conversaciones que necesiten revisión.`,
+        title: "Venus tránsito · conjunción · Marte natal",
+        window: "Hasta domingo",
+        text: "Atracción, magnetismo y acciones guiadas por el deseo. Canaliza en proyectos creativos o vínculos.",
         visuals: [
-          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-          { src: "/assets/forecast/aspects/quadrature.png", alt: "Retrógrado / revisión" }
+          { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/planets/mars.png", alt: "Marte natal" }
         ]
       },
       {
-        title: "Mercurio y planetas lentos",
-        window: commonWindow,
-        text: "Contacto con planetas lentos favorece investigación: ideal para auditar datos, terapias o estudios.",
+        title: "Venus tránsito · conjunción · Mercurio natal",
+        window: "Hasta 2 de diciembre",
+        text: "Comunicación afectiva, acuerdos y diplomacia. Buen momento para negociar con empatía.",
         visuals: [
-          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-          { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
-          { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
+          { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio natal" }
         ]
       },
       {
-        title: `Saturno retrógrado en ${signLabel(saturn) || "tu carta"}`,
-        window: commonWindow,
-        text: `Replantea límites y estructura en áreas ${signLabel(saturn)}. Buen momento para regularizar pendientes.`,
+        title: "Mercurio tránsito · conjunción · Mercurio natal",
+        window: "Hasta 13 de diciembre",
+        text: "Revisión profunda de ideas y contratos. Ajusta detalles y firma sólo lo necesario.",
         visuals: [
-          { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" },
-          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo / revisión" }
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio tránsito" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio natal" }
         ]
       },
       {
-        title: `Urano retrógrado en ${signLabel(uranus) || "tu carta"}`,
-        window: commonWindow,
-        text: `Revisión de cambios en valores/recursos. Ajusta presupuestos y evita saltos bruscos en economía.`,
+        title: "Mercurio tránsito · conjunción · Marte natal",
+        window: "Hasta 11 de diciembre",
+        text: "Palabras con fuerza: cuida la impulsividad al hablar, usa la energía para avanzar tareas.",
         visuals: [
-          { src: "/assets/forecast/planets/uranus.png", alt: "Urano" },
-          { src: "/assets/forecast/aspects/quincunx.png", alt: "Ajustes" }
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio tránsito" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/planets/mars.png", alt: "Marte natal" }
         ]
       },
       {
-        title: `Luna semanal (observa tu Luna en ${signLabel(moon) || "tu signo"})`,
-        window: `${fmt(weekStart)} · ${fmt(weekEnd)}`,
-        text: "Oscila entre sociabilidad e introspección; cuida descansos y agua. Ajusta agenda según tu energía diaria.",
+        title: "Venus tránsito · conjunción · Plutón natal",
+        window: "Hasta 4 de diciembre",
+        text: "Intensidad emocional y vínculos. Profundiza con honestidad y evita manipulación.",
         visuals: [
-          { src: "/assets/forecast/planets/moon.png", alt: "Luna" },
-          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo" }
+          { src: "/assets/forecast/planets/venus.png", alt: "Venus tránsito" },
+          { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+          { src: "/assets/forecast/planets/pluto.png", alt: "Plutón natal" }
         ]
       },
       {
-        title: `Sol en tránsito — foco en tu ${sunLabel || "Sol"}`,
-        window: commonWindow,
-        text: `Visibilidad y propósito: organiza agenda para priorizar tus metas clave según tu Sol en ${signLabel(sun)} y Asc en ${signLabel(asc)}.`,
+        title: "+45 aspectos adicionales",
+        window: "En ventana vigente",
+        text: "Más aspectos están activos; revisa el detalle completo en la carta para priorizar.",
         visuals: [
-          { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-          { src: "/assets/forecast/aspects/sextile.png", alt: "Impulso" }
+          { src: "/assets/forecast/aspects/trine.png", alt: "Aspectos" },
+          { src: "/assets/forecast/aspects/sextile.png", alt: "Aspectos" }
         ]
       }
     ];
