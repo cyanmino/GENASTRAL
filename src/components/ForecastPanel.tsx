@@ -137,10 +137,10 @@ export const ForecastPanel = () => {
       <div
         style={{
           position: "relative",
-          flex: 1,
-          minHeight: 0,
-          overflow: isPortrait ? "auto" : "hidden",
-          paddingBottom: isPortrait ? "0.5rem" : "2.5rem"
+          flex: isPortrait ? "none" : 1,
+          minHeight: isPortrait ? "auto" : 0,
+          overflow: isPortrait ? "visible" : "hidden",
+          paddingBottom: isPortrait ? 0 : "2.5rem"
         }}
       >
         <div

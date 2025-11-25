@@ -37,6 +37,7 @@ body {
   .app-shell {
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
+    height: auto;
   }
 }
 
@@ -56,6 +57,19 @@ body {
 @media (max-width: 1200px) {
   .app-column--middle {
     height: auto;
+  }
+}
+
+@media (max-width: 1200px) and (orientation: portrait) {
+  .app-shell {
+    height: auto;
+  }
+  .app-column {
+    min-height: auto;
+    overflow: visible;
+  }
+  .panel {
+    overflow: visible;
   }
 }
 
