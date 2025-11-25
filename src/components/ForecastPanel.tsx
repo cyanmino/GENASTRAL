@@ -10,18 +10,21 @@ export const ForecastPanel = () => {
   const chart = useChartStore((state) => state.chart);
   const [showGeneric, setShowGeneric] = useState(false);
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const [isPortrait, setIsPortrait] = useState(() => window.innerHeight > window.innerWidth);
+  const [isPortrait, setIsPortrait] = useState(false);
 
   useEffect(() => {
     setShowGeneric(false);
   }, [chart?.metadata?.utcDateTime]);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsPortrait(window.innerHeight > window.innerWidth);
+    const measure = () => {
+      if (typeof window !== "undefined") {
+        setIsPortrait(window.innerHeight > window.innerWidth);
+      }
     };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, []);
 
   const items = useMemo(() => {
