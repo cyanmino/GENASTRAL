@@ -61,15 +61,29 @@ body {
 }
 
 @media (max-width: 1200px) and (orientation: portrait) {
+  body {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+  #root {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
   .app-shell {
     height: auto;
   }
   .app-column {
     min-height: auto;
     overflow: visible;
+    flex: unset;
+  }
+  .app-column:first-child {
+    min-height: 300px;
   }
   .panel {
-    overflow: visible;
+    overflow: unset;
   }
 }
 

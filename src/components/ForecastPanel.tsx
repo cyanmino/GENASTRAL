@@ -1,33 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DateTime } from "luxon";
 import { useChartStore } from "../state/chartStore";
+import { ZODIAC_SIGNS } from "../lib/config";
 
 type ForecastVisual = { src: string; alt: string };
-type ForecastItem = { day: string; window: string; text: string; visuals: ForecastVisual[] };
-
-const GENERIC_ITEMS: ForecastItem[] = [
-  {
-    day: "Martes",
-    window: "3 al 5 de noviembre",
-    text: "Pronostico generico: Venus en sextil favorece acuerdos y creatividad.",
-    visuals: [
-      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-      { src: "/assets/forecast/aspects/sextile.png", alt: "Aspecto sextil" }
-    ]
-  },
-  {
-    day: "Miercoles",
-    window: "6 de noviembre",
-    text: "Marte activo: evita impulsividad, enfoca la accion con claridad.",
-    visuals: [{ src: "/assets/forecast/planets/mars.png", alt: "Marte" }]
-  },
-  {
-    day: "Jueves",
-    window: "7 de noviembre",
-    text: "Luna creciente: avanza en proyectos personales y logistica.",
-    visuals: [{ src: "/assets/forecast/planets/moon.png", alt: "Luna" }]
-  }
-];
+type ForecastItem = { title: string; window: string; text: string; visuals: ForecastVisual[] };
 
 export const ForecastPanel = () => {
   const chart = useChartStore((state) => state.chart);
@@ -49,60 +26,143 @@ export const ForecastPanel = () => {
 
   const items = useMemo(() => {
     const now = DateTime.local().setLocale("es");
-    const formatDate = (dt: DateTime) => dt.toFormat("dd 'de' LLLL yyyy");
-    const dayName = (offset: number, dt: DateTime) => {
-      if (offset === 0) return "Hoy";
-      const raw = dt.toFormat("cccc");
-      return raw.charAt(0).toUpperCase() + raw.slice(1);
-    };
+    const weekStart = now.set({ weekday: 1 }).startOf("day");
+    const weekEnd = weekStart.plus({ days: 6 }).endOf("day");
+    const fmt = (dt: DateTime) => dt.toFormat("dd 'de' LLLL yyyy");
+    const commonWindow = `${fmt(weekStart)} · ${fmt(weekEnd)}`;
 
-    if (!chart || showGeneric) {
-      return GENERIC_ITEMS.map((base, index) => {
-        const date = now.plus({ days: index });
-        return {
-          ...base,
-          day: dayName(index, date),
-          window: `${formatDate(date.startOf("day"))} · ${formatDate(date.endOf("day"))}`
-        };
-      });
-    }
+    const sun = chart?.bodies.find((b) => b.id === "Sun");
+    const moon = chart?.bodies.find((b) => b.id === "Moon");
+    const asc = chart?.bodies.find((b) => b.id === "Ascendente");
+    const mercury = chart?.bodies.find((b) => b.id === "Mercury");
+    const saturn = chart?.bodies.find((b) => b.id === "Saturn");
+    const uranus = chart?.bodies.find((b) => b.id === "Uranus");
+    const signLabel = (body?: { signIndex: number }) =>
+      body ? ZODIAC_SIGNS[body.signIndex] ?? "" : "";
 
-    const sun = chart.bodies.find((b) => b.id === "Sun");
-    const sunLabel = sun ? sun.label ?? "Sol" : "Sol";
-
-    return [0, 1, 2].map((offset) => {
-      const date = now.plus({ days: offset });
-      const baseDay = dayName(offset, date);
-      const window = `${formatDate(date.startOf("day"))} · ${formatDate(date.endOf("day"))}`;
-
-      if (offset === 0) {
-        return {
-          day: baseDay,
-          window,
-          text: `Tránsito del día: potencia tu ${sunLabel} con foco en visibilidad y propósito.`,
-          visuals: [{ src: "/assets/forecast/planets/sun.png", alt: "Sol" }]
-        };
-      }
-
-      if (offset === 1) {
-        return {
-          day: baseDay,
-          window,
-          text: "Impulso marciano: canaliza la acción con claridad y evita la impulsividad.",
-          visuals: [{ src: "/assets/forecast/planets/mars.png", alt: "Marte" }]
-        };
-      }
-
-      return {
-        day: baseDay,
-        window,
-        text: "Fase lunar activa: buen momento para ajustar logística y autocuidado.",
+    const baseItems: ForecastItem[] = [
+      {
+        title: "Mercurio retrógrado",
+        window: commonWindow,
+        text:
+          "Semana de revisión e introspección: ajustes en comunicación, contratos y motivaciones profundas. Evita lanzamientos finales hasta pasar el retrógrado.",
+        visuals: [
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
+          { src: "/assets/forecast/aspects/quadrature.png", alt: "Retrógrado / revisión" }
+        ]
+      },
+      {
+        title: "Aspectos de Mercurio con planetas lentos",
+        window: commonWindow,
+        text: "Sextiles y contactos a planetas lentos facilitan investigar y ver capas ocultas. Ideal para auditar información.",
+        visuals: [
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
+          { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
+          { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
+        ]
+      },
+      {
+        title: "Saturno retrógrado",
+        window: commonWindow,
+        text: "Revisión de límites y responsabilidades emocionales. Cierra pendientes, ordena rutinas y compromisos.",
+        visuals: [
+          { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" },
+          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo / revisión" }
+        ]
+      },
+      {
+        title: "Urano retrógrado",
+        window: commonWindow,
+        text: "Cambios en valores, recursos y estabilidad. Ajusta presupuestos y evita decisiones bruscas en economía.",
+        visuals: [
+          { src: "/assets/forecast/planets/uranus.png", alt: "Urano" },
+          { src: "/assets/forecast/aspects/quincunx.png", alt: "Ajustes" }
+        ]
+      },
+      {
+        title: "Luna recorriendo la semana",
+        window: `${fmt(weekStart)} · ${fmt(weekEnd)}`,
+        text:
+          "Luna cambia rápido de signo: oscila entre momentos sociales y de introspección. Observa tu energía diaria y ajusta agenda.",
         visuals: [
           { src: "/assets/forecast/planets/moon.png", alt: "Luna" },
-          { src: "/assets/forecast/aspects/trine.png", alt: "Aspecto trigono" }
+          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo" }
         ]
-      };
-    });
+      },
+      {
+        title: "Sol en tránsito",
+        window: commonWindow,
+        text: `Enfoque semanal en propósito y visibilidad. Úsalo para clarificar metas y narrativa personal.`,
+        visuals: [
+          { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
+          { src: "/assets/forecast/aspects/sextile.png", alt: "Impulso" }
+        ]
+      }
+    ];
+
+    if (!chart || showGeneric) {
+      return baseItems;
+    }
+
+    const personalized: ForecastItem[] = [
+      {
+        title: `Mercurio retrógrado en ${signLabel(mercury) || "tu carta"}`,
+        window: commonWindow,
+        text: `Revisa comunicaciones y acuerdos en claves ${signLabel(mercury)}. Observa mensajes, mails y conversaciones que necesiten revisión.`,
+        visuals: [
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
+          { src: "/assets/forecast/aspects/quadrature.png", alt: "Retrógrado / revisión" }
+        ]
+      },
+      {
+        title: "Mercurio y planetas lentos",
+        window: commonWindow,
+        text: "Contacto con planetas lentos favorece investigación: ideal para auditar datos, terapias o estudios.",
+        visuals: [
+          { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
+          { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
+          { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
+        ]
+      },
+      {
+        title: `Saturno retrógrado en ${signLabel(saturn) || "tu carta"}`,
+        window: commonWindow,
+        text: `Replantea límites y estructura en áreas ${signLabel(saturn)}. Buen momento para regularizar pendientes.`,
+        visuals: [
+          { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" },
+          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo / revisión" }
+        ]
+      },
+      {
+        title: `Urano retrógrado en ${signLabel(uranus) || "tu carta"}`,
+        window: commonWindow,
+        text: `Revisión de cambios en valores/recursos. Ajusta presupuestos y evita saltos bruscos en economía.`,
+        visuals: [
+          { src: "/assets/forecast/planets/uranus.png", alt: "Urano" },
+          { src: "/assets/forecast/aspects/quincunx.png", alt: "Ajustes" }
+        ]
+      },
+      {
+        title: `Luna semanal (observa tu Luna en ${signLabel(moon) || "tu signo"})`,
+        window: `${fmt(weekStart)} · ${fmt(weekEnd)}`,
+        text: "Oscila entre sociabilidad e introspección; cuida descansos y agua. Ajusta agenda según tu energía diaria.",
+        visuals: [
+          { src: "/assets/forecast/planets/moon.png", alt: "Luna" },
+          { src: "/assets/forecast/aspects/trine.png", alt: "Flujo" }
+        ]
+      },
+      {
+        title: `Sol en tránsito — foco en tu ${sunLabel || "Sol"}`,
+        window: commonWindow,
+        text: `Visibilidad y propósito: organiza agenda para priorizar tus metas clave según tu Sol en ${signLabel(sun)} y Asc en ${signLabel(asc)}.`,
+        visuals: [
+          { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
+          { src: "/assets/forecast/aspects/sextile.png", alt: "Impulso" }
+        ]
+      }
+    ];
+
+    return personalized;
   }, [chart, showGeneric]);
 
   return (
@@ -156,9 +216,9 @@ export const ForecastPanel = () => {
             paddingBottom: isPortrait ? "0" : "0.5rem"
           }}
         >
-        {items.map((item) => (
+        {items.map((item, idx) => (
           <div
-            key={item.day}
+            key={`${item.title}-${idx}`}
             style={{
               background: "rgba(15,23,42,0.65)",
               border: "1px solid rgba(148,163,184,0.3)",
@@ -174,7 +234,7 @@ export const ForecastPanel = () => {
               overflow: "hidden"
             }}
           >
-            <strong style={{ display: "block", fontSize: "1.25rem", color: "#bfdbfe", lineHeight: 1.1 }}>{item.day}</strong>
+            <strong style={{ display: "block", fontSize: "1.05rem", color: "#bfdbfe", lineHeight: 1.2 }}>{item.title}</strong>
             <div style={{ color: "#94a3b8" }}>{item.window}</div>
             <div
               style={{
