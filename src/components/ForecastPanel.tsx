@@ -22,7 +22,7 @@ const aspectImage = (label: string) => {
   if (normalized.includes("conj")) return "/assets/forecast/aspects/conjunction.png";
   if (normalized.includes("opos") || normalized.includes("oppos")) return "/assets/forecast/aspects/opposition.png";
   if (normalized.includes("trig") || normalized.includes("tri")) return "/assets/forecast/aspects/trine.png";
-  if (normalized.includes("cuad") || normalized.includes("square")) return "/assets/forecast/aspects/square.png";
+  if (normalized.includes("cuad") || normalized.includes("square")) return "/assets/forecast/aspects/quadrature.png";
   if (normalized.includes("sext")) return "/assets/forecast/aspects/sextile.png";
   if (normalized.includes("quin") || normalized.includes("quinc")) return "/assets/forecast/aspects/quincunx.png";
   return "/assets/forecast/aspects/sextile.png";
