@@ -42,15 +42,22 @@ export const DisplayControls = () => {
       <h2>Visualización</h2>
       <div className="controls-grid">
         {Object.entries(layers).map(([key, enabled]) => (
-          <label key={key} className="control-pill">
-            <input type="checkbox" checked={enabled} onChange={() => toggleLayer(key as keyof typeof layers)} />
+          <button
+            key={key}
+            type="button"
+            className={`control-toggle ${enabled ? "control-toggle--active" : ""}`}
+            onClick={() => toggleLayer(key as keyof typeof layers)}
+          >
             {layerLabels[key as keyof typeof layers] ?? key}
-          </label>
+          </button>
         ))}
-        <label className="control-pill">
-          <input type="checkbox" checked={showTransits} onChange={toggleShowTransits} />
+        <button
+          type="button"
+          className={`control-toggle ${showTransits ? "control-toggle--active" : ""}`}
+          onClick={toggleShowTransits}
+        >
           Mostrar tránsitos
-        </label>
+        </button>
       </div>
 
       {layers.signModes && (
@@ -70,14 +77,14 @@ export const DisplayControls = () => {
           <strong>{group.title}</strong>
           <div className="controls-grid">
             {group.ids.map((id) => (
-              <label key={id} className="control-pill">
-                <input
-                  type="checkbox"
-                  checked={visibleBodies[id] ?? true}
-                  onChange={() => toggleBodyVisibility(id)}
-                />
+              <button
+                key={id}
+                type="button"
+                className={`control-toggle ${visibleBodies[id] ?? true ? "control-toggle--active" : ""}`}
+                onClick={() => toggleBodyVisibility(id)}
+              >
                 {BODY_LABELS[id] ?? id}
-              </label>
+              </button>
             ))}
           </div>
         </div>

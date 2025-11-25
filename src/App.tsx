@@ -25,7 +25,7 @@ const App = () => {
         <ProfileManager />
         <InputPanel />
       </div>
-      <div className="app-column" style={{ height: "100vh" }}>
+      <div className="app-column app-column--middle">
         {rightTab === "forecast" ? (
           <ForecastPanel />
         ) : rightTab === "solar" ? (
