@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { DateTime } from "luxon";
 import { useChartStore } from "../state/chartStore";
 
 type ForecastVisual = { src: string; alt: string };
@@ -31,31 +32,77 @@ const GENERIC_ITEMS: ForecastItem[] = [
 export const ForecastPanel = () => {
   const chart = useChartStore((state) => state.chart);
   const [showGeneric, setShowGeneric] = useState(false);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [isPortrait, setIsPortrait] = useState(() => window.innerHeight > window.innerWidth);
 
   useEffect(() => {
     setShowGeneric(false);
   }, [chart?.metadata?.utcDateTime]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const items = useMemo(() => {
-    if (!chart || showGeneric) return GENERIC_ITEMS;
+    const now = DateTime.local().setLocale("es");
+    const formatDate = (dt: DateTime) => dt.toFormat("dd 'de' LLLL yyyy");
+    const dayName = (offset: number, dt: DateTime) => {
+      if (offset === 0) return "Hoy";
+      const raw = dt.toFormat("cccc");
+      return raw.charAt(0).toUpperCase() + raw.slice(1);
+    };
+
+    if (!chart || showGeneric) {
+      return GENERIC_ITEMS.map((base, index) => {
+        const date = now.plus({ days: index });
+        return {
+          ...base,
+          day: dayName(index, date),
+          window: `${formatDate(date.startOf("day"))} · ${formatDate(date.endOf("day"))}`
+        };
+      });
+    }
+
     const sun = chart.bodies.find((b) => b.id === "Sun");
     const sunLabel = sun ? sun.label ?? "Sol" : "Sol";
-    return [
-      {
-        day: "Martes",
-        window: "3 al 5 de noviembre",
-        text: `Para tu ${sunLabel}, foco en crecimiento personal y visibilidad.`,
-        visuals: [{ src: "/assets/forecast/planets/sun.png", alt: "Sol" }]
-      },
-      GENERIC_ITEMS[1],
-      {
-        ...GENERIC_ITEMS[2],
+
+    return [0, 1, 2].map((offset) => {
+      const date = now.plus({ days: offset });
+      const baseDay = dayName(offset, date);
+      const window = `${formatDate(date.startOf("day"))} · ${formatDate(date.endOf("day"))}`;
+
+      if (offset === 0) {
+        return {
+          day: baseDay,
+          window,
+          text: `Tránsito del día: potencia tu ${sunLabel} con foco en visibilidad y propósito.`,
+          visuals: [{ src: "/assets/forecast/planets/sun.png", alt: "Sol" }]
+        };
+      }
+
+      if (offset === 1) {
+        return {
+          day: baseDay,
+          window,
+          text: "Impulso marciano: canaliza la acción con claridad y evita la impulsividad.",
+          visuals: [{ src: "/assets/forecast/planets/mars.png", alt: "Marte" }]
+        };
+      }
+
+      return {
+        day: baseDay,
+        window,
+        text: "Fase lunar activa: buen momento para ajustar logística y autocuidado.",
         visuals: [
           { src: "/assets/forecast/planets/moon.png", alt: "Luna" },
           { src: "/assets/forecast/aspects/trine.png", alt: "Aspecto trigono" }
         ]
-      }
-    ];
+      };
+    });
   }, [chart, showGeneric]);
 
   return (
@@ -87,7 +134,28 @@ export const ForecastPanel = () => {
         )}
       </div>
 
-      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "stretch", flex: 1, minHeight: 0 }}>
+      <div
+        style={{
+          position: "relative",
+          flex: 1,
+          minHeight: 0,
+          overflow: isPortrait ? "auto" : "hidden",
+          paddingBottom: isPortrait ? "0.5rem" : "2.5rem"
+        }}
+      >
+        <div
+          ref={trackRef}
+          style={{
+            display: "flex",
+            flexDirection: isPortrait ? "column" : "row",
+            gap: "0.75rem",
+            height: isPortrait ? "auto" : "100%",
+            overflowX: isPortrait ? "visible" : "auto",
+            overflowY: isPortrait ? "visible" : "hidden",
+            scrollBehavior: "smooth",
+            paddingBottom: isPortrait ? "0" : "0.5rem"
+          }}
+        >
         {items.map((item) => (
           <div
             key={item.day}
@@ -96,12 +164,14 @@ export const ForecastPanel = () => {
               border: "1px solid rgba(148,163,184,0.3)",
               borderRadius: "0.75rem",
               padding: "0.75rem",
-              width: "220px",
               display: "flex",
               flexDirection: "column",
               gap: "0.6rem",
               flex: 1,
-              minHeight: "100%"
+              minWidth: isPortrait ? "100%" : "240px",
+              maxWidth: isPortrait ? "100%" : "260px",
+              boxSizing: "border-box",
+              overflow: "hidden"
             }}
           >
             <strong style={{ display: "block", fontSize: "1.25rem", color: "#bfdbfe", lineHeight: 1.1 }}>{item.day}</strong>
@@ -116,7 +186,9 @@ export const ForecastPanel = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "0.5rem"
+                padding: "0.5rem",
+                overflow: "hidden",
+                width: "100%"
               }}
             >
               <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", justifyContent: "center", flexWrap: "wrap" }}>
@@ -125,14 +197,65 @@ export const ForecastPanel = () => {
                     key={visual.src}
                     src={visual.src}
                     alt={visual.alt}
-                    style={{ maxWidth: "100px", maxHeight: "120px", objectFit: "contain" }}
+                    style={{ maxWidth: "100px", maxHeight: "120px", objectFit: "contain", display: "block" }}
                   />
                 ))}
               </div>
             </div>
-            <div style={{ color: "#e2e8f0", marginTop: "auto", fontSize: "0.95rem", lineHeight: 1.4 }}>{item.text}</div>
+            <div
+              style={{
+                color: "#e2e8f0",
+                marginTop: "auto",
+                fontSize: "0.95rem",
+                lineHeight: 1.4,
+                background: "rgba(15,23,42,0.4)",
+                borderRadius: "0.5rem",
+                padding: "0.5rem"
+              }}
+            >
+              {item.text}
+            </div>
           </div>
         ))}
+        </div>
+        {!isPortrait && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "0.25rem",
+              right: "0.5rem",
+              display: "flex",
+              gap: "0.35rem",
+              background: "rgba(15,23,42,0.8)",
+              border: "1px solid rgba(148,163,184,0.3)",
+              borderRadius: "999px",
+              padding: "0.25rem 0.4rem"
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                const el = trackRef.current;
+                if (el) el.scrollLeft -= 240;
+              }}
+              style={{ background: "transparent", border: "none", color: "#e2e8f0", cursor: "pointer", fontWeight: 700 }}
+              aria-label="Desplazar a la izquierda"
+            >
+              ◀
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const el = trackRef.current;
+                if (el) el.scrollLeft += 240;
+              }}
+              style={{ background: "transparent", border: "none", color: "#e2e8f0", cursor: "pointer", fontWeight: 700 }}
+              aria-label="Desplazar a la derecha"
+            >
+              ▶
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
