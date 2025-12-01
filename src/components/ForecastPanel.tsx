@@ -23,154 +23,226 @@ const aspectIcon = (label: string) => {
   return "/assets/forecast/aspects/sextile.png";
 };
 
-const TODAY_ITEMS: ForecastItem[] = [
+const buildTodayItems = (now: DateTime): ForecastItem[] => {
+  const startLabel = now.setLocale("es").toFormat("dd 'de' LLLL yyyy");
+  const endLabel = now.plus({ days: 6 }).setLocale("es").toFormat("dd 'de' LLLL yyyy");
+  return [
+    {
+      title: "Clima de hoy",
+      window: `${startLabel} · Próximos 7 días hasta ${endLabel}`,
+      text: "Clima base; se actualiza automáticamente y muestra la semana siguiente.",
+      visuals: [
+        { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
+        { src: "/assets/forecast/planets/moon.png", alt: "Luna" },
+        { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" }
+      ]
+    }
+  ];
+};
+
+const MARIANO_ASPECTS: ForecastItem[] = [
   {
-    title: "Clima de hoy",
-    window: "25 de noviembre 2025",
-    text:
-      "Sol 3° Sagitario: expansión y búsqueda de verdad. Mercurio 22° Escorpio retrógrado: revisión profunda de motivaciones. Venus 23° Escorpio: intensidad en vínculos y finanzas.",
+    title: "Sol trígono Luna",
+    window: "1 nov 05:58",
+    text: "Sol tránsito trígono Luna natal (Escorpio 9°04' · Casa 10).",
     visuals: [
       { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-      { src: "/assets/forecast/signs/sagitario.png", alt: "Sagitario" },
-      { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-      { src: "/assets/forecast/signs/escorpio.png", alt: "Escorpio" }
+      { src: "/assets/forecast/aspects/trine.png", alt: "Trígono" },
+      { src: "/assets/forecast/planets/moon.png", alt: "Luna" }
     ]
   },
   {
-    title: "Mercurio Rx ☐ Neptuno",
-    window: "Exacto 25 nov · 09:23 TU",
-    text: "Tendencia a confusión y lapsos. Revisa datos, evita suposiciones y pausa antes de firmar o enviar mensajes sensibles.",
-    visuals: [
-      { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-      { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
-      { src: "/assets/forecast/planets/neptune.png", alt: "Neptuno" }
-    ]
-  },
-  {
-    title: "Venus △ Júpiter Rx",
-    window: "Trígono de agua (Escorpio–Cáncer)",
-    text: "Alineación favorable: armonía y oportunidades en relaciones y recursos, especialmente para signos de agua.",
+    title: "Venus trígono Saturno",
+    window: "1 nov 20:38",
+    text: "Venus tránsito trígono Saturno natal (Libra 23°38' · Casa 9).",
     visuals: [
       { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
       { src: "/assets/forecast/aspects/trine.png", alt: "Trígono" },
-      { src: "/assets/forecast/planets/jupiter.png", alt: "Júpiter" },
-      { src: "/assets/forecast/signs/cancer.png", alt: "Cáncer" }
+      { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" }
     ]
   },
   {
-    title: "Luna creciente",
-    window: "Hacia Cuarto Creciente (28 nov)",
-    text: "Momento para avanzar lo iniciado en Luna Nueva; acciones graduales y ajustes prácticos.",
+    title: "Venus conjunción Júpiter",
+    window: "4 nov 05:53",
+    text: "Venus tránsito conjunción Júpiter natal (Libra 26°37' · Casa 9).",
     visuals: [
-      { src: "/assets/forecast/planets/moon.png", alt: "Luna" },
-      { src: "/assets/forecast/aspects/sextile.png", alt: "Creciente" }
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/jupiter.png", alt: "Júpiter" }
+    ]
+  },
+  {
+    title: "Venus conjunción Sol",
+    window: "8 nov 17:28",
+    text: "Venus tránsito conjunción Sol natal (Escorpio 2°14' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/sun.png", alt: "Sol" }
+    ]
+  },
+  {
+    title: "Sol sextil Neptuno / Urano",
+    window: "10 nov 17:04",
+    text: "Sol tránsito sextil Neptuno y Urano natales (Escorpio 18°33' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
+      { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
+      { src: "/assets/forecast/planets/neptune.png", alt: "Neptuno" },
+      { src: "/assets/forecast/planets/uranus.png", alt: "Urano" }
+    ]
+  },
+  {
+    title: "Sol conjunción Marte",
+    window: "11 nov 19:14",
+    text: "Sol tránsito conjunción Marte natal (Escorpio 19°39' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/mars.png", alt: "Marte" }
+    ]
+  },
+  {
+    title: "Venus trígono Luna",
+    window: "14 nov 04:21",
+    text: "Venus tránsito trígono Luna natal (Escorpio 9°04' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/trine.png", alt: "Trígono" },
+      { src: "/assets/forecast/planets/moon.png", alt: "Luna" }
+    ]
+  },
+  {
+    title: "Sol conjunción Mercurio",
+    window: "14 nov 15:18",
+    text: "Sol tránsito conjunción Mercurio natal (Escorpio 22°30' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" }
+    ]
+  },
+  {
+    title: "Sol cuadratura Saturno",
+    window: "15 nov 18:18",
+    text: "Sol tránsito cuadratura Saturno natal (Escorpio 23°38' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
+      { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
+      { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" }
+    ]
+  },
+  {
+    title: "Sol conjunción Plutón",
+    window: "16 nov 15:15",
+    text: "Sol tránsito conjunción Plutón natal (Escorpio 24°31' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
+    ]
+  },
+  {
+    title: "Marte cuadratura Luna",
+    window: "17 nov 02:19",
+    text: "Marte tránsito cuadratura Luna natal (Sagitario 9°04' · Casa 11).",
+    visuals: [
+      { src: "/assets/forecast/planets/mars.png", alt: "Marte" },
+      { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
+      { src: "/assets/forecast/planets/moon.png", alt: "Luna" }
+    ]
+  },
+  {
+    title: "Marte sextil Venus",
+    window: "21 nov 01:25",
+    text: "Marte tránsito sextil Venus natal (Sagitario 11°57' · Casa 11).",
+    visuals: [
+      { src: "/assets/forecast/planets/mars.png", alt: "Marte" },
+      { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" }
+    ]
+  },
+  {
+    title: "Venus sextil Neptuno / Urano",
+    window: "21 nov 17:41",
+    text: "Venus tránsito sextil Neptuno y Urano natales (Escorpio 18°33' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
+      { src: "/assets/forecast/planets/neptune.png", alt: "Neptuno" },
+      { src: "/assets/forecast/planets/uranus.png", alt: "Urano" }
+    ]
+  },
+  {
+    title: "Venus conjunción Marte",
+    window: "22 nov 14:37",
+    text: "Venus tránsito conjunción Marte natal (Escorpio 19°39' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/mars.png", alt: "Marte" }
+    ]
+  },
+  {
+    title: "Mercurio conjunción Plutón (R)",
+    window: "23 nov 08:15",
+    text: "Mercurio tránsito conjunción Plutón natal (Escorpio 24°31' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
+    ]
+  },
+  {
+    title: "Mercurio cuadratura Saturno (R)",
+    window: "24 nov 03:37",
+    text: "Mercurio tránsito cuadratura Saturno natal (Escorpio 23°38' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
+      { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
+      { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" }
+    ]
+  },
+  {
+    title: "Venus conjunción Mercurio",
+    window: "24 nov 21:08",
+    text: "Venus tránsito conjunción Mercurio natal (Escorpio 22°30' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" }
+    ]
+  },
+  {
+    title: "Mercurio conjunción Mercurio (R)",
+    window: "25 nov 08:49",
+    text: "Mercurio tránsito conjunción Mercurio natal (Escorpio 22°30' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio natal" }
+    ]
+  },
+  {
+    title: "Venus cuadratura Saturno",
+    window: "25 nov 18:47",
+    text: "Venus tránsito cuadratura Saturno natal (Escorpio 23°38' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
+      { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" }
+    ]
+  },
+  {
+    title: "Venus conjunción Plutón",
+    window: "26 nov 11:35",
+    text: "Venus tránsito conjunción Plutón natal (Escorpio 24°31' · Casa 10).",
+    visuals: [
+      { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
+      { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
+      { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
     ]
   }
-];
-
-const MARIANO_ASPECTS: ForecastItem[] = [
-  { title: "Sol trígono Luna", window: "1 nov 05:58", text: "Sol tránsito trígono Luna natal (Escorpio 9°04’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-    { src: "/assets/forecast/aspects/trine.png", alt: "Trígono" },
-    { src: "/assets/forecast/planets/moon.png", alt: "Luna" }
-  ]},
-  { title: "Venus trígono Saturno", window: "1 nov 20:38", text: "Venus tránsito trígono Saturno natal (Libra 23°38’ · Casa 9).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/trine.png", alt: "Trígono" },
-    { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" }
-  ]},
-  { title: "Venus conjunción Júpiter", window: "4 nov 05:53", text: "Venus tránsito conjunción Júpiter natal (Libra 26°37’ · Casa 9).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/jupiter.png", alt: "Júpiter" }
-  ]},
-  { title: "Venus conjunción Sol", window: "8 nov 17:28", text: "Venus tránsito conjunción Sol natal (Escorpio 2°14’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/sun.png", alt: "Sol" }
-  ]},
-  { title: "Sol sextil Neptuno / Urano", window: "10 nov 17:04", text: "Sol tránsito sextil Neptuno y Urano natales (Escorpio 18°33’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-    { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
-    { src: "/assets/forecast/planets/neptune.png", alt: "Neptuno" },
-    { src: "/assets/forecast/planets/uranus.png", alt: "Urano" }
-  ]},
-  { title: "Sol conjunción Marte", window: "11 nov 19:14", text: "Sol tránsito conjunción Marte natal (Escorpio 19°39’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/mars.png", alt: "Marte" }
-  ]},
-  { title: "Venus trígono Luna", window: "14 nov 04:21", text: "Venus tránsito trígono Luna natal (Escorpio 9°04’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/trine.png", alt: "Trígono" },
-    { src: "/assets/forecast/planets/moon.png", alt: "Luna" }
-  ]},
-  { title: "Sol conjunción Mercurio", window: "14 nov 15:18", text: "Sol tránsito conjunción Mercurio natal (Escorpio 22°30’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" }
-  ]},
-  { title: "Sol cuadratura Saturno", window: "15 nov 18:18", text: "Sol tránsito cuadratura Saturno natal (Escorpio 23°38’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-    { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
-    { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" }
-  ]},
-  { title: "Sol conjunción Plutón", window: "16 nov 15:15", text: "Sol tránsito conjunción Plutón natal (Escorpio 24°31’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/sun.png", alt: "Sol" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
-  ]},
-  { title: "Marte cuadratura Luna", window: "17 nov 02:19", text: "Marte tránsito cuadratura Luna natal (Sagitario 9°04’ · Casa 11).", visuals: [
-    { src: "/assets/forecast/planets/mars.png", alt: "Marte" },
-    { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
-    { src: "/assets/forecast/planets/moon.png", alt: "Luna" }
-  ]},
-  { title: "Marte sextil Venus", window: "21 nov 01:25", text: "Marte tránsito sextil Venus natal (Sagitario 11°57’ · Casa 11).", visuals: [
-    { src: "/assets/forecast/planets/mars.png", alt: "Marte" },
-    { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" }
-  ]},
-  { title: "Venus sextil Neptuno / Urano", window: "21 nov 17:41", text: "Venus tránsito sextil Neptuno y Urano natales (Escorpio 18°33’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/sextile.png", alt: "Sextil" },
-    { src: "/assets/forecast/planets/neptune.png", alt: "Neptuno" },
-    { src: "/assets/forecast/planets/uranus.png", alt: "Urano" }
-  ]},
-  { title: "Venus conjunción Marte", window: "22 nov 14:37", text: "Venus tránsito conjunción Marte natal (Escorpio 19°39’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/mars.png", alt: "Marte" }
-  ]},
-  { title: "Mercurio conjunción Plutón (R)", window: "23 nov 08:15", text: "Mercurio tránsito conjunción Plutón natal (Escorpio 24°31’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
-  ]},
-  { title: "Mercurio cuadratura Saturno (R)", window: "24 nov 03:37", text: "Mercurio tránsito cuadratura Saturno natal (Escorpio 23°38’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-    { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
-    { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" }
-  ]},
-  { title: "Venus conjunción Mercurio", window: "24 nov 21:08", text: "Venus tránsito conjunción Mercurio natal (Escorpio 22°30’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" }
-  ]},
-  { title: "Mercurio conjunción Mercurio (R)", window: "25 nov 08:49", text: "Mercurio tránsito conjunción Mercurio natal (Escorpio 22°30’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/mercury.png", alt: "Mercurio natal" }
-  ]},
-  { title: "Venus cuadratura Saturno", window: "25 nov 18:47", text: "Venus tránsito cuadratura Saturno natal (Escorpio 23°38’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/quadrature.png", alt: "Cuadratura" },
-    { src: "/assets/forecast/planets/saturn.png", alt: "Saturno" }
-  ]},
-  { title: "Venus conjunción Plutón", window: "26 nov 11:35", text: "Venus tránsito conjunción Plutón natal (Escorpio 24°31’ · Casa 10).", visuals: [
-    { src: "/assets/forecast/planets/venus.png", alt: "Venus" },
-    { src: "/assets/forecast/aspects/conjunction.png", alt: "Conjunción" },
-    { src: "/assets/forecast/planets/pluto.png", alt: "Plutón" }
-  ]}
 ];
 
 export const ForecastPanel = () => {
@@ -217,18 +289,21 @@ export const ForecastPanel = () => {
   }, [chart, showGeneric, activeProfile]);
 
   const items = useMemo(() => {
-    const base = TODAY_ITEMS;
+    const now = DateTime.now();
+    const base = buildTodayItems(now);
     if (!chart) return base;
     if (showGeneric) return base;
     return [...base, ...personalizedCards];
   }, [chart, personalizedCards, showGeneric]);
+
+  const todayLabel = DateTime.now().setLocale("es").toFormat("dd 'de' LLLL yyyy");
 
   return (
     <div className="panel" style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem", height: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h2 style={{ margin: 0 }}>Pronóstico</h2>
-          <span style={{ color: "#22d3ee" }}>Tránsito actual (25 nov 2025)</span>
+          <span style={{ color: "#22d3ee" }}>Tránsito actual ({todayLabel})</span>
         </div>
         {chart && (
           <button
